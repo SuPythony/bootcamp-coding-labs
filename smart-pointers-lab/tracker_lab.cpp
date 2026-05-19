@@ -133,18 +133,20 @@ public:
         std::cerr << id_ << " born" << std::endl;
     }
 
+    ~Tracker() = default;
+
     Tracker(Tracker& other) = delete;
     Tracker& operator=(const Tracker& other) = delete;
 
     Tracker(Tracker&& other) : id_{next_id()}, data_{std::move(other.data_)} {
-        std::cerr << id_ << " copied from " << other.id_ << std::endl;
+        std::cerr << id_ << " moved from " << other.id_ << std::endl;
     }
 
     Tracker& operator=(Tracker&& other) {
         if (*this == other) return *this;
         delete data_;
         data_ = std::move(other.data_);
-        std::cerr << id_ << " assigned from " << other.id_ << std::endl;
+        std::cerr << id_ << " moved from " << other.id_ << std::endl;
     }
     
     T& get() const {
@@ -199,28 +201,29 @@ public:
 //   5. Print use_count() after each addition to watch the ref count climb.
 //   6. Let one portfolio go out of scope — watch use_count() drop.
 // =============================================================================
-// class Portfolio {
-// public:
-//     std::string name_;
-//     std::vector<std::shared_ptr<Tracker<int>>> holdings_;
 
-//     explicit Portfolio(std::string name) : name_(std::move(name)) {}
+class Portfolio {
+    std::string name_;
+    std::vector<std::shared_ptr<Tracker<int>>> holdings_;
 
-//     void add(std::shared_ptr<Tracker<int>> t) {
-//         // TODO: push_back t, then log name_ + " now holds tracker " + id
-//         //       and print t.use_count()
-//     }
+public:
+    explicit Portfolio(std::string name) : name_(std::move(name)) {}
 
-//     void print() const {
-//         // TODO: implement print out for each holding in the portfolio
-//     }
-// };
+    void add(std::shared_ptr<Tracker<int>> t) {
+        // TODO: push_back t, then log name_ + " now holds tracker " + id
+        //       and print t.use_count()
+    }
 
-// std::shared_ptr<Tracker<int>> make_tracker(int value) {
-//     // TODO: produce a shared pointer
-//     // Q1: Why make a make_tracker function?
-//     // Q2: There are two ways to make a shared_ptr<Tracker<int>>. Which one is more appropriate here and is one always better?
-// }
+    void print() const {
+        // TODO: implement print out for each holding in the portfolio
+    }
+};
+
+std::shared_ptr<Tracker<int>> make_tracker(int value) {
+    // TODO: produce a shared pointer
+    // Q1: Why make a make_tracker function?
+    // Q2: There are two ways to make a shared_ptr<Tracker<int>>. Which one is more appropriate here and is one always better?
+}
 
 // ─── Stage 3 main ─────────────────────────────────────────────────────────────
 /*
