@@ -21,8 +21,16 @@ Corpus tokenize(std::string& source) {
 }
 
 std::set<Misspelling> spellcheck(const Corpus& source, const Dictionary& dictionary) {
-  /* TODO: Implement this method */
-  return std::set<Misspelling>();
+  auto view = source 
+      | std::views::filter([&dictionary](Token token) { return !dictionary.contains(token.content); })
+      | std::views::transform([&dictionary](Token token) {
+        auto view = dictionary | std::views::filter([&token](std::string word) {
+          return levenshtein(token.content, word) == 1;
+        });
+        std::set<std::string> sugg(view.begin(), view.end());
+        return Misspelling{token, sugg};
+      }) | std::views::filter([](Misspelling miss) { return !miss.suggestions.empty(); });
+  return std::set<Misspelling>(view.begin(), view.end());
 };
 
 /* Helper methods */
