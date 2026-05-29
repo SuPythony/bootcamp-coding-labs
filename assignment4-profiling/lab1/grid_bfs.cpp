@@ -327,7 +327,7 @@ HeatmapSummary summarize_heatmap(const vector<int> &heatmap, int rows, int cols)
  * source value, and a small deterministic pulse so each pass keeps doing real
  * work instead of collapsing into a trivial copy.
  */
-int next_pressure_value(int center, int north, int south, int west, int east,
+inline int next_pressure_value(int center, int north, int south, int west, int east,
                         int source, int row, int col, int pass) {
     int pulse = (row * 17 + col * 31 + pass * 13) & 15;
     int pressure = (center * 2 + north + south + west + east + source + pulse) / 8;
