@@ -209,8 +209,8 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
     heatmap[start_index] += 1;
     frontier[frontier_tail++] = request.start;
 
-    const int drow[4] = {-1, 1, 0, 0};
-    const int dcol[4] = {0, 0, -1, 1};
+    static const int drow[4] = {-1, 1, 0, 0};
+    static const int dcol[4] = {0, 0, -1, 1};
 
     while (frontier_head < frontier_tail) {
         Point current = frontier[frontier_head++];
@@ -301,12 +301,13 @@ HeatmapSummary summarize_heatmap(const vector<int> &heatmap, int rows, int cols)
         }
     }
 
-    for (int threshold = 1; threshold <= kHeatmapThresholdCount; ++threshold) {
-        int cells_at_or_above_threshold = 0;
+    vector<int> sf(summary.max_visits+2, 0);
+    for (int i = summary.max_visits; i >= 1; i--) {
+        sf[i] = sf[i + 1] + visit_counts[i];
+    }
 
-        for (int visits = threshold; visits <= summary.max_visits; ++visits) {
-            cells_at_or_above_threshold += visit_counts[visits];
-        }
+    for (int threshold = 1; threshold <= kHeatmapThresholdCount; ++threshold) {
+        int cells_at_or_above_threshold = sf[threshold];
 
         summary.threshold_checksum =
             summary.threshold_checksum * 1315423911ULL +
