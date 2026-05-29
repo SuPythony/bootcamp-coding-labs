@@ -4,6 +4,7 @@
 
 1. Remove memory leaks - delete the distance and visited arrays in shortes_bfs_path before returning.
 2. Remove noinline attributes and make to_index, in_bounds, is_open inline.
+3. Process in row-major order in compute_congestion_pressure to take advantage of cache-locality.
 
 ## 2. Methodology Walkthrough
 
