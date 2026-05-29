@@ -56,21 +56,21 @@ struct CongestionSummary {
 /**
  * Convert a row and column pair into a one-dimensional array index.
  */
-__attribute__((noinline)) int to_index(int row, int col, int cols) {
+inline int to_index(int row, int col, int cols) {
     return row * cols + col;
 }
 
 /**
  * Return true if the coordinate is inside the grid bounds.
  */
-__attribute__((noinline)) bool in_bounds(int row, int col, int rows, int cols) {
+inline bool in_bounds(int row, int col, int rows, int cols) {
     return row >= 0 && row < rows && col >= 0 && col < cols;
 }
 
 /**
  * Return true if the coordinate refers to a traversable grid cell.
  */
-__attribute__((noinline)) bool is_open(const vector<string> &grid, int row, int col) {
+inline bool is_open(const vector<string> &grid, int row, int col) {
     return grid[row][col] != '#';
 }
 

@@ -3,6 +3,7 @@
 ## 1. Optimizations Made
 
 1. Remove memory leaks - delete the distance and visited arrays in shortes_bfs_path before returning.
+2. Remove noinline attributes and make to_index, in_bounds, is_open inline.
 
 ## 2. Methodology Walkthrough
 
@@ -21,7 +22,7 @@ Before:
 ![flamegraph before](images/flamegraph_before.svg)
 ![valgrind before](images/valgrind_before.png)
 ![callgrind before](images/callgrind_before.png)
-![kcachegrind before](images/kcachegrind_before.png.png)
+![kcachegrind before](images/kcachegrind_before.png)
 
 ## 3. Correctness Evidence
 
