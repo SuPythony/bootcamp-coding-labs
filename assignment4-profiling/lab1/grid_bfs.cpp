@@ -54,8 +54,9 @@ struct CongestionSummary {
 };
 
 vector<int> dist(kRows * kCols);
-vector<unsigned char> vis(kRows * kCols);
+vector<int> vis(kRows * kCols, 0);
 vector<Point> frontier(kRows * kCols);
+int cur = 0;
 
 /**
  * Convert a row and column pair into a one-dimensional array index.
@@ -196,14 +197,14 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
     int rows = static_cast<int>(grid.size());
     int cols = static_cast<int>(grid[0].size());
 
-    fill(vis.begin(), vis.end(), 0);
+    cur++;
     size_t frontier_head = 0;
     size_t frontier_tail = 0;
 
     int start_index = request.start.row * cols + request.start.col;
     int goal_index = request.goal.row * cols + request.goal.col;
 
-    vis[start_index] = 1;
+    vis[start_index] = cur;
     dist[start_index] = 0;
     heatmap[start_index] += 1;
     frontier[frontier_tail++] = request.start;
@@ -231,11 +232,11 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
             }
 
             int next_index = next_row * cols + next_col;
-            if (vis[next_index]) {
+            if (vis[next_index] == cur) {
                 continue;
             }
 
-            vis[next_index] = 1;
+            vis[next_index] = cur;
             dist[next_index] = dist[current_index] + 1;
             heatmap[next_index] += 1;
             frontier[frontier_tail++] = {next_row, next_col};

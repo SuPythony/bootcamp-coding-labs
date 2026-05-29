@@ -7,6 +7,7 @@
 3. Process in row-major order in compute_congestion_pressure to take advantage of cache-locality.
 4. Inline next_pressure_value.
 5. Hoist distance, visited and frontier arrays in shortest_path_bfs to top - prevents repeatedly allocating and deallocating memory on heap for the three arrays in each call.
+6. Replace fill of visited with counter - Instead of 1 representing visited, maintain a counter variable for the current bfs call number and check visited based on that. Removes the need to fill the visited array (vis) on each call.
 
 ## 2. Methodology Walkthrough
 
