@@ -262,12 +262,10 @@ RunSummary run_all_requests(const vector<string> &grid,
 
         int distance = shortest_path_bfs(grid, request, heatmap);
 
-        if (distance >= 0) {
-            summary.reachable += 1;
-            summary.total_distance += distance;
-        } else {
-            summary.unreachable += 1;
-        }
+        int dist_neg = distance == -1;
+        summary.reachable += !dist_neg;
+        summary.total_distance += distance + dist_neg; // If distance is -1, add 1 to compensate
+        summary.unreachable += dist_neg;
     }
 
     return summary;
@@ -307,7 +305,7 @@ HeatmapSummary summarize_heatmap(const vector<int> &heatmap, int rows, int cols)
     }
 
     for (int threshold = 1; threshold <= kHeatmapThresholdCount; ++threshold) {
-        int cells_at_or_above_threshold = sf[threshold];
+        int cells_at_or_above_threshold = sf[min(threshold, summary.max_visits+1)];
 
         summary.threshold_checksum =
             summary.threshold_checksum * 1315423911ULL +
