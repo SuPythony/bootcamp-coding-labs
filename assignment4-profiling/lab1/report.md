@@ -16,29 +16,65 @@
 
 I mainly used perf and time. I tried to optimize the hot-paths, which turned out to be compute_congestions_pressure and shortest_path_bfs. After each change I timed it's performance (using time and the in-program chrono clock) to compare to the previous version.
 
-Before:
+### Before:
+
+time:
 
 ![time before](images/time_before.png)
+
+perf stat:
+
 ![perf stat before](images/perf_stat_before.png)
+
+flamegraph:
+
 ![flamegraph before](images/flamegraph_before.svg)
+
+valgrind:
+
 ![valgrind before](images/valgrind_before.png)
+
+callgrind:
+
 ![callgrind before](images/callgrind_before.png)
 
-After:
+### After:
+
+time:
 
 ![time after](images/time_after.png)
+
+perf stat:
+
 ![perf stat after](images/perf_stat_after.png)
+
+flamegraph:
+
 ![flamegraph after](images/flamegraph_after.svg)
+
+valgrind:
+
 ![valgrind after](images/valgrind_after.png)
+
+callgrind:
+
 ![callgrind after](images/callgrind_after.png)
 
 ## 3. Correctness Evidence
 
-Include:
+make test:
 
-- `make test`
-- Final normal run output
-- Checksum comparison before and after optimization
+![make test](images/make_test.png)
+
+Output after optimization:
+
+![output](images/output.png)
+
+Output before optimization:
+
+![output old](images/output_old.png)
+
+Checksums are same.
 
 ## 4. Conceptual Questions
 
