@@ -2,7 +2,7 @@
 
 ## 1. Optimizations Made
 
-- TODO
+1. Remove memory leaks - delete the distance and visited arrays in shortes_bfs_path before returning.
 
 ## 2. Methodology Walkthrough
 
@@ -13,6 +13,15 @@ Include before/after evidence from:
 - FlameGraph
 - Callgrind/KCachegrind
 - Valgrind leak summary
+
+Before:
+
+![time before](images/time_before.png)
+![perf stat before](images/perf_stat_before.png)
+![flamegraph before](images/flamegraph_before.svg)
+![valgrind before](images/valgrind_before.png)
+![callgrind before](images/callgrind_before.png)
+![kcachegrind before](images/kcachegrind_before.png.png)
 
 ## 3. Correctness Evidence
 

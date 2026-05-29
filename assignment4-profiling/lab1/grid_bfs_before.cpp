@@ -216,10 +216,7 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
 
         int current_index = current.row * cols + current.col;
         if (current_index == goal_index) {
-            const int res = distance[current_index];
-            delete[] distance;
-            delete[] visited;
-            return res;
+            return distance[current_index];
         }
 
         for (int direction = 0; direction < 4; ++direction) {
@@ -245,8 +242,6 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
         }
     }
 
-    delete[] distance;
-    delete[] visited;
     return -1;
 }
 
