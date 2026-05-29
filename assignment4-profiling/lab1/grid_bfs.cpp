@@ -53,6 +53,10 @@ struct CongestionSummary {
     uint64_t pressure_checksum = 0;
 };
 
+vector<int> dist(kRows * kCols);
+vector<unsigned char> vis(kRows * kCols);
+vector<Point> frontier(kRows * kCols);
+
 /**
  * Convert a row and column pair into a one-dimensional array index.
  */
@@ -191,20 +195,16 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
                       vector<int> &heatmap) {
     int rows = static_cast<int>(grid.size());
     int cols = static_cast<int>(grid[0].size());
-    int total = rows * cols;
 
-    int *distance = new int[total];
-    std::fill(distance, distance + total, -1);
-    unsigned char *visited = new unsigned char[total]{};
-    vector<Point> frontier(static_cast<size_t>(total));
+    fill(vis.begin(), vis.end(), 0);
     size_t frontier_head = 0;
     size_t frontier_tail = 0;
 
     int start_index = request.start.row * cols + request.start.col;
     int goal_index = request.goal.row * cols + request.goal.col;
 
-    visited[start_index] = 1;
-    distance[start_index] = 0;
+    vis[start_index] = 1;
+    dist[start_index] = 0;
     heatmap[start_index] += 1;
     frontier[frontier_tail++] = request.start;
 
@@ -216,10 +216,7 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
 
         int current_index = current.row * cols + current.col;
         if (current_index == goal_index) {
-            const int res = distance[current_index];
-            delete[] distance;
-            delete[] visited;
-            return res;
+            return dist[current_index];
         }
 
         for (int direction = 0; direction < 4; ++direction) {
@@ -234,19 +231,17 @@ int shortest_path_bfs(const vector<string> &grid, const RouteRequest &request,
             }
 
             int next_index = next_row * cols + next_col;
-            if (visited[next_index]) {
+            if (vis[next_index]) {
                 continue;
             }
 
-            visited[next_index] = 1;
-            distance[next_index] = distance[current_index] + 1;
+            vis[next_index] = 1;
+            dist[next_index] = dist[current_index] + 1;
             heatmap[next_index] += 1;
             frontier[frontier_tail++] = {next_row, next_col};
         }
     }
 
-    delete[] distance;
-    delete[] visited;
     return -1;
 }
 
