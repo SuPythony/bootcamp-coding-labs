@@ -2,7 +2,6 @@
 #include <iostream>
 #include <utility>
 #include <vector>
-#include <cstdint>
 #include <numeric>
 
 // This is a constant that won't change anywhere. Maybe use this to optimize something?
@@ -91,8 +90,31 @@ static std::vector<int> build_dependency_value(int n) {
     return remap;
 }
 
-static void refresh_history(std::vector<int>& history, const std::vector<Packet>& packets, int history_cols) {
-    const int rows = (int)history.size() / history_cols;
+static std::vector<int> build_dependency_sums(int count, const std::vector<int>& next, const std::vector<int>& value) {
+    std::vector<int> sums(count, 0);
+    for (int i = 0; i < count; i++) {
+        int idx = i;
+        idx = next[idx];
+        sums[i] += value[idx];
+        idx = next[idx];
+        sums[i] += value[idx];
+        idx = next[idx];
+        sums[i] += value[idx];
+        idx = next[idx];
+        sums[i] += value[idx];
+        idx = next[idx];
+        sums[i] += value[idx];
+        idx = next[idx];
+        sums[i] += value[idx];
+        idx = next[idx];
+        sums[i] += value[idx];
+    }
+    return sums;
+}
+
+static int refresh_history(std::vector<int>& history, const std::vector<Packet>& packets, int history_cols) {
+    static const int rows = (int)history.size() / history_cols;
+    int total = 0;
 
     for (const Packet& p: packets) {
         int idx = p.device_id * history_cols + (p.stamp & (history_cols - 1)); // history_cols is a power of 2 (128 or 2048)
@@ -101,11 +123,15 @@ static void refresh_history(std::vector<int>& history, const std::vector<Packet>
 
     for (int row_start = 0; row_start < rows * history_cols; row_start += history_cols) {
         int carry = history[row_start];
+        total += (carry & 31);
         for (int c = 1; c < history_cols; ++c) {
             carry = (carry + history[row_start + c]) & 2047;
             history[row_start + c] = carry;
+            total += (carry & 31);
         }
     }
+
+    return total;
 }
 
 static int branchy_score(const Packet& p, const std::vector<int>& lane_weight) {
@@ -139,102 +165,20 @@ static int branchy_score(const Packet& p, const std::vector<int>& lane_weight) {
     return score & 4095;
 }
 
-static int chase_dependency(int start, const std::vector<int>& next, const std::vector<int>& value) {
-    int idx = start & ((int)next.size() - 1);
-    int total = 0;
-
-    idx = next[idx];
-    total += value[idx];
-    idx = next[idx];
-    total += value[idx];
-    idx = next[idx];
-    total += value[idx];
-    idx = next[idx];
-    total += value[idx];
-    idx = next[idx];
-    total += value[idx];
-    idx = next[idx];
-    total += value[idx];
-    idx = next[idx];
-    total += value[idx];
-
-    return total;
-}
-
-static int cold_column_probe(const std::vector<int>& history) {
-    return std::accumulate(history.begin(), history.end(), 0, [](int a, int b) {
-        return a + (b & 31);
-    });
-}
-
 static long long process_packets(
     const std::vector<Packet>& packets,
     const std::vector<int>& lane_weight,
-    const std::vector<int>& dependency_next,
-    const std::vector<int>& dependency_value
+    const std::vector<int>& dependency_sums
 ) {
     long long total = 0;
 
-    constexpr int unroll_factor = 8;
-
-    int i = 0;
-    for (; i + unroll_factor <= (int)packets.size(); i += unroll_factor) {
-        uint8_t chase[unroll_factor];
-        int idx[unroll_factor], lane[unroll_factor], val[unroll_factor]{};
-
-        for (int j = 0; j < unroll_factor; j++) {
-            const Packet& p = packets[i + j];
-            const int score = branchy_score(p, lane_weight);
-            chase[j] = ((score ^ p.quality) & 7) != 0;
-            idx[j] = (score + p.device_id) & ((int)dependency_next.size() - 1);
-            lane[j] = p.lane;
-            total += score;
-        }
-
-        for (int j = 0; j < unroll_factor; j++) {
-            idx[j] = dependency_next[idx[j]];
-            val[j] += dependency_value[idx[j]];
-        }
-        for (int j = 0; j < unroll_factor; j++) {
-            idx[j] = dependency_next[idx[j]];
-            val[j] += dependency_value[idx[j]];
-        }
-        for (int j = 0; j < unroll_factor; j++) {
-            idx[j] = dependency_next[idx[j]];
-            val[j] += dependency_value[idx[j]];
-        }
-        for (int j = 0; j < unroll_factor; j++) {
-            idx[j] = dependency_next[idx[j]];
-            val[j] += dependency_value[idx[j]];
-        }
-        for (int j = 0; j < unroll_factor; j++) {
-            idx[j] = dependency_next[idx[j]];
-            val[j] += dependency_value[idx[j]];
-        }
-        for (int j = 0; j < unroll_factor; j++) {
-            idx[j] = dependency_next[idx[j]];
-            val[j] += dependency_value[idx[j]];
-        }
-        for (int j = 0; j < unroll_factor; j++) {
-            idx[j] = dependency_next[idx[j]];
-            val[j] += dependency_value[idx[j]];
-        }
-
-        for (int j = 0; j < unroll_factor; j++) {
-            total += chase[j] * val[j];
-            total += !chase[j] * lane_weight[lane[j]];
-        }
-    }
-
-    for (; i < (int)packets.size(); ++i) {
+    for (std::size_t i = 0; i < packets.size(); ++i) {
         const Packet& p = packets[i];
         int score = branchy_score(p, lane_weight);
 
-        if ((score ^ p.quality) & 7) {
-            score += chase_dependency(score + p.device_id, dependency_next, dependency_value);
-        } else {
-            score += lane_weight[p.lane];
-        }
+        int flag = ((score ^ p.quality) & 7) > 0;
+        score += flag * dependency_sums[score + p.device_id];
+        score += !flag * lane_weight[p.lane];
 
         total += score;
     }
@@ -245,21 +189,18 @@ static long long process_packets(
 static long long run_epoch(
     std::vector<Packet>& packets,
     const std::vector<int>& lane_weight,
-    const std::vector<int>& dependency_next,
-    const std::vector<int>& dependency_value,
+    const std::vector<int>& dependency_sums,
     std::vector<int>& history,
     int history_cols
 ) {
-    refresh_history(history, packets, history_cols);
+    long long total = refresh_history(history, packets, history_cols);
 
-    long long total = process_packets(
+    total += process_packets(
         packets,
         lane_weight,
-        dependency_next,
-        dependency_value
+        dependency_sums
     );
 
-    total += cold_column_probe(history);
     return total;
 }
 
@@ -280,13 +221,14 @@ int main() {
     std::vector<int> dependency_value = build_dependency_value(dependency_count);
     std::vector<int> history(device_count * history_cols, 0);
 
+    std::vector<int> dependency_sums = build_dependency_sums(dependency_count, dependency_next, dependency_value);
+
     long long answer = 0;
     for (int epoch = 0; epoch < epochs; ++epoch) {
         answer += run_epoch(
             packets,
             lane_weight,
-            dependency_next,
-            dependency_value,
+            dependency_sums,
             history,
             history_cols
         );

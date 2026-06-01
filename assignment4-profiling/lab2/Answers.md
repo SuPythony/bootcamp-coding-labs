@@ -43,3 +43,17 @@ Before:
 After:
 
 ![after](images/image-5.png)
+
+## Second try
+
+Above, the performance was not visibly improving as by doing the loop unrollings for chase_dependency, I inadvertently increased the instruction count. So even if cache-misses reduced significantly, the increased instructions compensated.
+
+Now on top of the above refactorings, instead of calling chase_dependency I pre-built the sums starting from each index. This way pointer-chasing is just done once at the beginning instead of in calls to process_packets. Also unrolled the inner loop as STEPS is a small constant.
+
+Remove cold_column_probe, calculate some directly in refresh_history. history does not change in process_packets, so we can directly find the sum during the refresh_history call. Also make rows static.
+
+Tried: Changing packets from an array of structs to a struct of arrays bit didn't get any improvement in performance.
+
+With -O2:
+
+![perf stat](images/image-7.png)
