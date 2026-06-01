@@ -33,3 +33,13 @@ Perf record with history_cols = 128
 Perf record with history_cols = 2048
 
 ![perf record 2048](images/image-4.png)
+
+Perf stat with -O3:
+
+Before:
+
+![before](images/image-6.png)
+
+After:
+
+![after](images/image-5.png)
