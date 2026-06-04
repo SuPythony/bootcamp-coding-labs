@@ -43,3 +43,13 @@ std::ostream& operator<<(std::ostream& os, const User& user) {
   os << ")";
   return os;
 }
+
+User& User::operator+=(User& rhs) {
+  _friends.add(rhs._name);
+  rhs.add_friend(_name);
+  return *this;
+}
+
+bool User::operator<(const User& rhs) const {
+  return _name < rhs._name;
+}
