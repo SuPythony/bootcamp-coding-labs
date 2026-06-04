@@ -18,6 +18,11 @@ public:
 
   friend std::ostream& operator<<(std::ostream& os, const User& user);
 
+  /*
+  Removing the move constructor and assignment fails the tests as it requires
+  User to be non-movable. So if I just delete those 2, by rule of 5 I'll need
+  the rest of the SMF's too. Therefore, keeping them all.
+  */
   ~User() = default;
   User(const User& user) = default;
   User& operator=(const User& user) = default;

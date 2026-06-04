@@ -55,3 +55,18 @@ Q3 (Rule of Zero — Part 6, if attempted).
     or the other in 2–4 sentences.
 
     YOUR ANSWER:
+    As we are now using standard containers (`std::vector`, `std::string`)
+    instead of raw pointers, all the SMSs are managed internally by the
+    containers. If we don't declare them, the compiler defaults to the
+    container implementations. In Part 1, we were using a raw pointer for
+    the friend list and if we did not have a destructor, the pointer would
+    not have been freen automatically which would have led to memory leaks.
+    Similarly for copy constructor and assignment, the compiler would not
+    have known to assign an array to _friends and copy its contents.
+
+    Originally in part 1, we did not want the User class to support move
+    semantics. That's why we deleted them (otherwise we could have just
+    implemented them). So if we remove their declarations, the compiler
+    will default to the containers for them (and both support move semantics).
+    So User will automatically get move semantics. But originally, we
+    didn't want it to. So I think we should keep them deleted.
