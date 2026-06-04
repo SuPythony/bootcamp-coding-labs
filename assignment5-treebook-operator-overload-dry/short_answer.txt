@@ -42,10 +42,9 @@ Q2 (SRP — Part 4).
     6. Managing friends size and capacity - FriendList
     7. Providing copying facility. - FriendList (for list)
 
-    The copy constructor and assignment operator became default. Only the
-    constructor was kept handwritten as we were not default constructing
-    the name string, instead passing an argument to it. The move conctructor
-    and assignment operator were kept deleted as we don't require move semantics.
+    The desturctor, copy constructor and assignment operator became
+    default. The move conctructor and assignment operator were kept 
+    deleted as we don't require move semantics.
 
 
 Q3 (Rule of Zero — Part 6, if attempted).
