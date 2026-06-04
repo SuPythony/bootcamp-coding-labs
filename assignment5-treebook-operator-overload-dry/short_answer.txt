@@ -9,6 +9,21 @@ Q1 (DRY — Part 3).
     why it is exception-safe.
 
     YOUR ANSWER:
+    These were duplicated:
+
+    for (int i = 0; i < _size; i++) {
+        _friends[i] = user._friends[i];
+    }
+
+    Also copying the private variables is also duplicated but in copy 
+    constructor they are in member-initializer list.
+
+    I used the copy-and-swap idiom. It eleminates duplication as the
+    actual copying part is done by just using the copy constructor.
+    Then swap to get those copied members to the original object.
+    We have to make it exception-safe as otherwise if an exception
+    occurs during swapping, the objects might be left in a broken,
+    unspecified state.
 
 
 Q2 (SRP — Part 4).

@@ -81,15 +81,15 @@ User::User(const User& user): _name{user._name}, _friends{new std::string[user._
   }
 }
 
-User& User::operator=(const User& user) {
+User& User::operator=(User user) {
   if (this == &user) return *this;
-  delete[] _friends;
-  _name = user._name;
-  _friends = new std::string[user._capacity];
-  _size = user._size;
-  _capacity = user._capacity;
-  for (int i = 0; i < _size; i++) {
-    _friends[i] = user._friends[i];
-  }
+  swap(user);
   return *this;
+}
+
+void User::swap(User& user) noexcept {
+  std::swap(_name, user._name);
+  std::swap(_friends, user._friends);
+  std::swap(_size, user._size);
+  std::swap(_capacity, user._capacity);
 }

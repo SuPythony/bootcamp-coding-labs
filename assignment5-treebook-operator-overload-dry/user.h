@@ -20,7 +20,7 @@ public:
 
   ~User();
   User(const User& user);
-  User& operator=(const User& user);
+  User& operator=(User user);
   User(User&& user) = delete;
   User& operator=(User&& user) = delete;
 
@@ -29,4 +29,6 @@ private:
   std::string* _friends;
   size_t _size;
   size_t _capacity;
+
+  void swap(User& other) noexcept;
 };
